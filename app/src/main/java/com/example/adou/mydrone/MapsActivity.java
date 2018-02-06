@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements
-        GoogleMap.OnMarkerClickListener,
         OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -35,6 +35,9 @@ public class MapsActivity extends FragmentActivity implements
     private Marker mSydney;
     private Marker mDrone;
     private Marker mDarwin;
+
+    private Marker selectedMarker;
+
     private List<Marker> markers;
     private List<LatLng> markersLatLng;
 
@@ -66,6 +69,8 @@ public class MapsActivity extends FragmentActivity implements
                 // Set our specific action
                 Snackbar.make(view, text2, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                deleteMarker(selectedMarker);
             }
         });
         markers = new ArrayList<>();
@@ -155,11 +160,20 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onMapClick(LatLng latLng) {
                 Marker newMarker = mMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .draggable(true));
+                        .position(latLng)
+                        .title("Selected")
+                        .draggable(true));
                 markers.add(newMarker);
                 markersLatLng.add(latLng);
                 drawPolygon();
+            }
+        });
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                selectedMarker = marker;
+                return false;
             }
         });
 
@@ -198,35 +212,16 @@ public class MapsActivity extends FragmentActivity implements
                 .draggable(mDrone.isDraggable()));
     }
 
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
-        if (marker.equals(mMelbourne)) {
-            // This causes the marker at Melbourne to bounce into position when it is clicked.
-            final Handler handler = new Handler();
-            final long start = SystemClock.uptimeMillis();
-            final long duration = 1500;
+    public void deleteMarker (Marker marker) {
+        Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+        if (marker != null && marker != mDrone) {
+            LatLng l = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+            Log.i("marker","" + markers.remove(marker));
+            Log.i("lL","" + markersLatLng.remove(l));
+            drawPolygon();
 
-            final Interpolator interpolator = new BounceInterpolator();
-
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    long elapsed = SystemClock.uptimeMillis() - start;
-                    float t = Math.max(
-                            1 - interpolator.getInterpolation((float) elapsed / duration), 0);
-                    marker.setAnchor(0.5f, 1.0f + 2 * t);
-
-                    if (t > 0.0) {
-                        // Post again 16ms later.
-                        handler.postDelayed(this, 16);
-                    }
-                }
-            });
+            // old marker is no more selected
+            selectedMarker = null;
         }
-
-        // We return false to indicate that we have not consumed the event and that we wish
-        // for the default behavior to occur (which is for the camera to move such that the
-        // marker is centered and for the marker's info window to open, if it has one).
-        return false;
     }
 }
