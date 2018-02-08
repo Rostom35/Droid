@@ -25,22 +25,32 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback {
 
     private GoogleMap mMap;
+
+    private Map<LatLng, Integer> indexMarkers;  // To retrieve a Marker index
+
+    private List<Marker> markers; // List of markers show on Google Map
+    private List<LatLng> markersLatLng; // LatLng list for drawing polygon
+
+    // Some coordinates marker in order to test
     private Marker mMelbourne;
     private Marker mSydney;
-    private Marker mDrone;
     private Marker mDarwin;
 
+    // represents the current clicked Marker
     private Marker selectedMarker;
 
-    private List<Marker> markers;
-    private List<LatLng> markersLatLng;
+    // Drone position marker
+    private Marker mDrone;
 
+    // Coordinates
     private static final LatLng MELBOURNE = new LatLng(-37.81319, 144.96298);
     private static final LatLng DRONE = new LatLng(-24.6980, 133.8807);
     private static final LatLng DARWIN = new LatLng(-12.4634, 130.8456);
@@ -54,27 +64,23 @@ public class MapsActivity extends FragmentActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        // Handle click event for floating button
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                LatLng current = mMap.getCameraPosition().target;
-                String text = "Current camera position (lat:"+current.latitude+",long:"+
-                        current.longitude + ")";
-
-                String text2 = "Nombre de markers=" + markers.size();
-                // Set our specific action
-                Snackbar.make(view, text2, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
+                // Handle click event for floating button
                 deleteMarker(selectedMarker);
+
+                String fabDebugText = "Nombre de markers=" + markers.size();
+                // Set our specific action
+                Snackbar.make(view, fabDebugText, Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         });
         markers = new ArrayList<>();
         markersLatLng = new ArrayList<>();
+        indexMarkers = new HashMap<>();
     }
 
 
@@ -97,13 +103,14 @@ public class MapsActivity extends FragmentActivity implements
                 .position(DRONE)
                 .title("Drone")
                 .snippet("Iris Plus qui coûte 2K€")
-                .draggable(true)
+                .draggable(false) // Drone is not draggable
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
 
         mSydney = mMap.addMarker(new MarkerOptions()
                 .position(SYDNEY)
                 .title("Marker in Sydney")
                 .draggable(true)); // Make marker draggable
+        indexMarkers.put(mSydney.getPosition(), markers.size());
         markers.add(mSydney);
         markersLatLng.add(SYDNEY);
 
@@ -112,6 +119,7 @@ public class MapsActivity extends FragmentActivity implements
                 .title("Melbourne")
                 .snippet("Population: 4,137,400")
                 .draggable(true));
+        indexMarkers.put(mMelbourne.getPosition(), markers.size());
         markers.add(mMelbourne);
         markersLatLng.add(MELBOURNE);
 
@@ -121,14 +129,12 @@ public class MapsActivity extends FragmentActivity implements
                 .title("Marker in Darwin")
                 .snippet("Darwin's marker...")
                 .draggable(true));
+        indexMarkers.put(mDarwin.getPosition(), markers.size());
         markers.add(mDarwin);
         markersLatLng.add(DARWIN);
 
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(SYDNEY));
-
-        // add control to perform zoom In/Out
-        // mMap.getUiSettings().setZoomControlsEnabled(true);
+        // Center Screen on the Drone
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(DRONE));
 
         // Remove markers control
         mMap.getUiSettings().setMapToolbarEnabled(false);
@@ -156,15 +162,17 @@ public class MapsActivity extends FragmentActivity implements
         });
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-
             @Override
             public void onMapClick(LatLng latLng) {
                 Marker newMarker = mMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title("Selected")
                         .draggable(true));
+
+                indexMarkers.put(latLng, markers.size());
                 markers.add(newMarker);
                 markersLatLng.add(latLng);
+
                 drawPolygon();
             }
         });
@@ -172,6 +180,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                // Saves the marker selection for future action like deletion
                 selectedMarker = marker;
                 return false;
             }
@@ -180,23 +189,34 @@ public class MapsActivity extends FragmentActivity implements
         drawPolygon();
     }
 
+    /**
+     * (re) draw Polygon shown on Google Map following our Marker List state
+     */
     public void drawPolygon(){
 
         mMap.clear();
 
         // Draw Polygon on our Google Maps
         PolygonOptions rectOptions = new PolygonOptions()
-//            .add( MELBOURNE, DARWIN, SYDNEY )
                 .addAll( markersLatLng )
                 .strokeColor(Color.parseColor("#7F616161"))
                 .fillColor(Color.parseColor("#7FBDBDBD"))
                 .strokeWidth(3);
 
         // Add polygon on map
-        mMap.addPolygon(rectOptions);
+        if (!markersLatLng.isEmpty()) {
+            mMap.addPolygon(rectOptions);
+        }
+
+        // Reindex all markers
+        indexMarkers = new HashMap<>();
 
         // put markers
         for (Marker m : markers) {
+            // Update the indexes
+            indexMarkers.put(m.getPosition(), markers.indexOf(m));
+
+            // show marker on map
             mMap.addMarker(new MarkerOptions()
                     .position(m.getPosition())
                     .title(m.getTitle())
@@ -204,6 +224,7 @@ public class MapsActivity extends FragmentActivity implements
                     .draggable(m.isDraggable()));
         }
 
+        // show Drone marker on map
         mMap.addMarker(new MarkerOptions()
                 .position(mDrone.getPosition())
                 .title(mDrone.getTitle())
@@ -212,13 +233,31 @@ public class MapsActivity extends FragmentActivity implements
                 .draggable(mDrone.isDraggable()));
     }
 
+    /**
+     * Delete a marker
+     * @param marker to delete
+     */
     public void deleteMarker (Marker marker) {
-        Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+
         if (marker != null && marker != mDrone) {
-            LatLng l = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-            Log.i("marker","" + markers.remove(marker));
-            Log.i("lL","" + markersLatLng.remove(l));
-            drawPolygon();
+
+            // get the index Marker
+            LatLng markerPosition = marker.getPosition();
+            Integer matchMarker = indexMarkers.get(markerPosition);
+
+            if (matchMarker != null) {
+                int index = matchMarker;
+
+                // clear markers[index] from map
+                markers.get(index).remove();
+
+                // remove markers[index] from coordinates cached
+                markersLatLng.remove(markerPosition);
+
+                // delete marker[index] from our markers List on Google Map
+                markers.remove(index);
+                drawPolygon();
+            }
 
             // old marker is no more selected
             selectedMarker = null;
