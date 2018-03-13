@@ -1,16 +1,11 @@
 package com.example.adou.mydrone;
 
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.Interpolator;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,7 +16,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.ArrayList;
@@ -40,9 +34,9 @@ public class MapsActivity extends FragmentActivity implements
     private List<LatLng> markersLatLng; // LatLng list for drawing polygon
 
     // Some coordinates marker in order to test
-    private Marker mMelbourne;
-    private Marker mSydney;
-    private Marker mDarwin;
+    private Marker mCannes;
+    private Marker mBrest;
+    private Marker mLondon;
 
     // represents the current clicked Marker
     private Marker selectedMarker;
@@ -51,10 +45,17 @@ public class MapsActivity extends FragmentActivity implements
     private Marker mDrone;
 
     // Coordinates
-    private static final LatLng MELBOURNE = new LatLng(-37.81319, 144.96298);
-    private static final LatLng DRONE = new LatLng(-24.6980, 133.8807);
-    private static final LatLng DARWIN = new LatLng(-12.4634, 130.8456);
-    private static final LatLng SYDNEY = new LatLng(-34, 151);
+    private static final LatLng DUNKIRK = new LatLng(51.050030, 2.397766);
+    private static final LatLng LILLE = new LatLng(50.629250, 3.057256);
+    private static final LatLng BREST = new LatLng(48.4, -4.4833);
+    private static final LatLng RENNES = new LatLng(48.0833, -1.6833);
+    private static final LatLng MENTON = new LatLng(43.774483, 7.497540);
+    private static final LatLng LONDON = new LatLng(51.5084, -0.1255);
+    private static final LatLng CANNES = new LatLng(43.552849, 7.017369);
+    private static final LatLng BEAUVAIS = new LatLng(49.431744, 2.089773);
+    private static final LatLng MULHOUSE = new LatLng(47.750839, 7.335888);
+    private static final LatLng BORDEAUX = new LatLng(44.836151, -0.580816);
+    private static final LatLng BOULOGNE_BILLANCOURT = new LatLng(48.843933, 2.247391);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,41 +101,41 @@ public class MapsActivity extends FragmentActivity implements
         // Add a marker in Sydney and move the camera
 
         mDrone = mMap.addMarker(new MarkerOptions()
-                .position(DRONE)
+                .position(RENNES)
                 .title("Drone")
                 .snippet("Iris Plus qui coûte 2K€")
                 .draggable(false) // Drone is not draggable
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
 
-        mSydney = mMap.addMarker(new MarkerOptions()
-                .position(SYDNEY)
+        mBrest = mMap.addMarker(new MarkerOptions()
+                .position(BREST)
                 .title("Marker in Sydney")
                 .draggable(true)); // Make marker draggable
-        indexMarkers.put(mSydney.getPosition(), markers.size());
-        markers.add(mSydney);
-        markersLatLng.add(SYDNEY);
+        indexMarkers.put(mBrest.getPosition(), markers.size());
+        markers.add(mBrest);
+        markersLatLng.add(BREST);
 
-        mMelbourne = mMap.addMarker(new MarkerOptions()
-                .position(MELBOURNE)
+        mCannes = mMap.addMarker(new MarkerOptions()
+                .position(CANNES)
                 .title("Melbourne")
                 .snippet("Population: 4,137,400")
                 .draggable(true));
-        indexMarkers.put(mMelbourne.getPosition(), markers.size());
-        markers.add(mMelbourne);
-        markersLatLng.add(MELBOURNE);
+        indexMarkers.put(mCannes.getPosition(), markers.size());
+        markers.add(mCannes);
+        markersLatLng.add(CANNES);
 
 
-        mDarwin = mMap.addMarker(new MarkerOptions()
-                .position(DARWIN)
-                .title("Marker in Darwin")
-                .snippet("Darwin's marker...")
+        mLondon = mMap.addMarker(new MarkerOptions()
+                .position(LONDON)
+                .title("Marker in Bordeaux")
+                .snippet("Bordeaux's marker...")
                 .draggable(true));
-        indexMarkers.put(mDarwin.getPosition(), markers.size());
-        markers.add(mDarwin);
-        markersLatLng.add(DARWIN);
+        indexMarkers.put(mLondon.getPosition(), markers.size());
+        markers.add(mLondon);
+        markersLatLng.add(LONDON);
 
         // Center Screen on the Drone
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(DRONE));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(RENNES));
 
         // Remove markers control
         mMap.getUiSettings().setMapToolbarEnabled(false);
