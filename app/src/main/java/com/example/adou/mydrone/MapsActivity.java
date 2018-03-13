@@ -1,5 +1,6 @@
 package com.example.adou.mydrone;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -60,6 +61,9 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = new Intent(this, MissionManager.class);
+        startActivity(intent);
+
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

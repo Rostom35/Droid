@@ -41,6 +41,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MissionManager">
+        </activity>
+        <activity
+            android:name=".MesMissions">
+        </activity>
+        <activity
+            android:name=".NewMission">
+        </activity>
         <service android:name="com.example.adou.mydrone.fr.istic.sit.rabbit.client.ClientRabbitService" />
     </application>
 
