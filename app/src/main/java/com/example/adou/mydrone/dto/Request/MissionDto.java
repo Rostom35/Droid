@@ -23,6 +23,15 @@ public class MissionDto {
 
     private List<LocationDto> locationDroneList;
 
+    public MissionDto(String id, String title, LocalDateTime dateBegin, LocalDateTime dateEnd, List<OrderDto> orderList,List<LocationDto> locationDroneList){
+        this.id = id;
+        this.title = title;
+        this.dateBegin = dateBegin;
+        this.dateEnd = dateEnd;
+        this.orderList = orderList;
+        this.locationDroneList = locationDroneList;
+    }
+
     public String getId() {
         return id;
     }
